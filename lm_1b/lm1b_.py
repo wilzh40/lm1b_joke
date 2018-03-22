@@ -66,6 +66,7 @@ tf.flags.DEFINE_integer('max_eval_steps', 1000000,
                         'Maximum mumber of steps to run "eval" mode.')
 
 tf.flags.DEFINE_integer('n_top_words', 5, 'Dump the top n next words')
+tf.flags.DEFINE_integer('cutoff', 3, 'Cutoff to stop branching')
 tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line')
 
 # For saving demo resources, use batch size 1 and step 1.
@@ -114,7 +115,12 @@ def _LoadModel(gd_file, ckpt_file):
                                      'global_step:0'], name='')
 
     sys.stderr.write('Recovering checkpoint %s\n' % ckpt_file)
-    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+    # Increase the GPU memory limit
+    os.environ["TF_CUDA_HOST_MEM_LIMIT_IN_MB"] = 10000
+
+    config = tf.ConfigProto(allow_soft_placement=True)
+    config.gpu_options.allow_growth= True
+    sess = tf.Session(config=config)
     sess.run('save/restore_all', {'save/Const:0': ckpt_file})
     sess.run(t['states_init'])
 
@@ -319,7 +325,7 @@ def _DumpNextWords(prefix_file, vocab):
   node_id = 0
 
   # Recursive function that returns a trie node
-  def sample_next(line):
+  def sample_next(line, cutoff):
     node = Node(line)
     prefix_words = line.strip()
     print(prefix_words)
@@ -355,7 +361,6 @@ def _DumpNextWords(prefix_file, vocab):
       if not samples:
         # We're done feeding in the prefix. It's time to get the predicted next words.
         # Cutoff early after 6 words, then just choose the top option
-        cutoff = 5
         top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
         indices = _SoftmaxTopIndices(softmax[0], top_words)
         # For all the top probabilities of all the word
@@ -376,7 +381,7 @@ def _DumpNextWords(prefix_file, vocab):
             finished_sentences.append(line)
           else:
             new_prefix = "{} {}".format(line, vocab.id_to_word(i))
-            new_child = sample_next(new_prefix)
+            new_child = sample_next(new_prefix, cutoff)
             probability = softmax[0][i]
             node.children[vocab.id_to_word(i)] = (probability, new_child)
             # edges.append((prefix_words[-1], vocab.id_to_word(i), softmax[0][i]))
@@ -386,10 +391,11 @@ def _DumpNextWords(prefix_file, vocab):
 
 
   biggest_embedding_diff(finished_sentences)
+  os.makedirs("./graphs", exist_ok=True)
   for line in filelines:
     # For each line, build the tree
-    tree = sample_next(line)
-    with open("graph_{}".format(line), 'w') as f: 
+    tree = sample_next(line, len(line.split()) + FLAGS.cutoff)
+    with open("./graphs/graph_{}_cutoff-{}_branch-{}".format(line, FLAGS.cutoff, FLAGS.n_top_words), 'w') as f: 
       visualize(tree, f)
       f.write("\n")
 

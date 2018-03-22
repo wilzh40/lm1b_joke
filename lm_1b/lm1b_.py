@@ -355,7 +355,7 @@ def _DumpNextWords(prefix_file, vocab):
       if not samples:
         # We're done feeding in the prefix. It's time to get the predicted next words.
         # Cutoff early after 6 words, then just choose the top option
-        cutoff = 4
+        cutoff = 5
         top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
         indices = _SoftmaxTopIndices(softmax[0], top_words)
         # For all the top probabilities of all the word
@@ -389,14 +389,15 @@ def _DumpNextWords(prefix_file, vocab):
   for line in filelines:
     # For each line, build the tree
     tree = sample_next(line)
-    with open("output_graphs", 'w') as f: 
+    with open("graph_{}".format(line), 'w') as f: 
       visualize(tree, f)
       f.write("\n")
 
   output = open("output_sentences", 'w') 
   for l in finished_sentences:
     output.write(l)
-    output.write("\n")
+    output.write("\t")
+    output.write(_DumpSentenceEmbedding(l))
     output.write("\n")
   output.close()
 

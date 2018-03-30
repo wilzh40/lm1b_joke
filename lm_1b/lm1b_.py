@@ -116,13 +116,17 @@ def _LoadModel(gd_file, ckpt_file):
 
     sys.stderr.write('Recovering checkpoint %s\n' % ckpt_file)
     # Increase the GPU memory limit
-    os.environ["TF_CUDA_HOST_MEM_LIMIT_IN_MB"] = 10000
+    os.environ["TF_CUDA_HOST_MEM_LIMIT_IN_MB"] = '10000'
 
     config = tf.ConfigProto(allow_soft_placement=True)
     config.gpu_options.allow_growth= True
     sess = tf.Session(config=config)
     sess.run('save/restore_all', {'save/Const:0': ckpt_file})
     sess.run(t['states_init'])
+
+    writer = tf.summary.FileWriter("output", sess.graph)
+    writer.close()
+
 
   return sess, t
 
@@ -337,7 +341,7 @@ def _DumpNextWords(prefix_file, vocab):
 
     prefix = [vocab.word_to_id(w) for w in prefix_words.split()]
     prefix_char_ids = [vocab.word_to_char_ids(w) for w in prefix_words.split()]
-    
+
     inputs = np.zeros([BATCH_SIZE, NUM_TIMESTEPS], np.int32)
     char_ids_inputs = np.zeros(
         [BATCH_SIZE, NUM_TIMESTEPS, vocab.max_word_length], np.int32)
@@ -358,12 +362,17 @@ def _DumpNextWords(prefix_file, vocab):
                                     t['targets_in']: targets,
                                     t['target_weights_in']: weights})
 
+      unlikely_cutoff = 10
+      use_unlikely = True
       if not samples:
         # We're done feeding in the prefix. It's time to get the predicted next words.
         # Cutoff early after 6 words, then just choose the top option
         top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
-        indices = _SoftmaxTopIndices(softmax[0], top_words)
+        top_indices = _SoftmaxTopIndices(softmax[0], unlikely_cutoff)
         # For all the top probabilities of all the word
+        indices = indices[:,top_words]
+        if use_unlikely:
+          indices.append(top_indices[-1])
         for i in indices:
           next_word = vocab.id_to_word(i)
           print("{}\t{}".format(next_word, softmax[0][i]))
@@ -391,18 +400,19 @@ def _DumpNextWords(prefix_file, vocab):
 
 
   biggest_embedding_diff(finished_sentences)
-  os.makedirs("./graphs", exist_ok=True)
+  os.makedirs("./graphs")
   for line in filelines:
     # For each line, build the tree
     tree = sample_next(line, len(line.split()) + FLAGS.cutoff)
-    with open("./graphs/graph_{}_cutoff-{}_branch-{}".format(line, FLAGS.cutoff, FLAGS.n_top_words), 'w') as f: 
+    with open("./graphs/graph_{}_cutoff-{}_branch-{}".format(line, FLAGS.cutoff, FLAGS.n_top_words), 'w') as f:
       visualize(tree, f)
       f.write("\n")
 
-  output = open("output_sentences", 'w') 
+  output = open("output_sentences", 'w')
   for l in finished_sentences:
     output.write(l)
     output.write("\t")
+    print(_DumpSentenceEmbedding(l))
     output.write(_DumpSentenceEmbedding(l))
     output.write("\n")
   output.close()

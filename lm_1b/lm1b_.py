@@ -405,7 +405,7 @@ def _DumpNextWords(prefix_file, vocab):
                                                    FLAGS.n_top_words,
                                                    FLAGS.n_unlikely_words)
         if use_unlikely:
-          indices.append(unlikely_indices)
+          indices = np.append(indices, unlikely_indices)
         # for i in indices:
         #   next_word = vocab.id_to_word(i)
         #   print("{}\t{}".format(next_word, softmax[0][i]))

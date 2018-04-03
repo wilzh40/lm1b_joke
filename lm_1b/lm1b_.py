@@ -388,7 +388,7 @@ def _DumpNextWords(prefix_file, vocab):
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or
-            len(prefix_words.split()) > FLAGS.max_sample_words):
+            len(prefix.split()) > FLAGS.max_sample_words):
             # This is the end of the sentence or it has exceeded the max_sample_words
             finished_sentences.append(prefix)
             break
@@ -420,7 +420,7 @@ def _DumpNextWords(prefix_file, vocab):
 
           # Append the new words to the top
           if (next_word == '</S>' or
-            len(prefix_words.split()) > FLAGS.max_sample_words):
+            len(prefix.split()) > FLAGS.max_sample_words):
             # This is the end of the sentence or it has exceeded the max_sample_words
             finished_sentences.append(prefix)
           else:

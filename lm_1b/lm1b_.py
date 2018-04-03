@@ -363,6 +363,7 @@ def _DumpNextWords(prefix_file, vocab):
 
     while True:
       inputs[0, 0] = samples[0]
+      print(char_ids_samples[0].shape)
       char_ids_inputs[0, 0, :] = char_ids_samples[0]
       samples = samples[1:]
       char_ids_samples = char_ids_samples[1:]

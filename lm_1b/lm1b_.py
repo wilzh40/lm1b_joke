@@ -317,7 +317,7 @@ def _SoftmaxTopIndices(softmax, n):
 
 # Returns two lists, top_n_words chosen from the top, and random_n_words chosen randomly
 # Limit is 150 words
-def sample_softmax(softmax, top_n_words, random_n_words):
+def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 150)
   known_indices = [i for i in top_indices_sorted if i != vocab.eos]
   return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
@@ -384,7 +384,7 @@ def _DumpNextWords(prefix_file, vocab):
         # This occurs when specified conditions are met, like after a certain amount of words we stop branching
         nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
-          indices, _ = sample_softmax(softmax[0], 1, 0)
+          indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or
@@ -400,7 +400,8 @@ def _DumpNextWords(prefix_file, vocab):
 
 
         # top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
-        indices, unlikely_indices = sample_softmax(softmax[0], FLAGS.n_top_words,
+        indices, unlikely_indices = sample_softmax(softmax[0],  vocab,
+                                                   FLAGS.n_top_words,
                                                    FLAGS.n_unlikely_words)
         if use_unlikely:
           indices.append(unlikely_indices)
@@ -432,7 +433,7 @@ def _DumpNextWords(prefix_file, vocab):
 
 
   biggest_embedding_diff(finished_sentences)
-  os.makedirs("./graphs")
+  # os.makedirs("./graphs")
   for line in filelines:
     # For each line, build the tree
     tree = sample_next(line, len(line.split()) + FLAGS.cutoff)

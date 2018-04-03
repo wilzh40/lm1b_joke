@@ -449,8 +449,8 @@ def _DumpNextWords(prefix_file, vocab):
   for l in finished_sentences:
     output.write(l)
     output.write("\t")
-    print(_DumpSentenceEmbedding(l))
-    output.write(_DumpSentenceEmbedding(l))
+    print(_DumpSentenceEmbedding(l,vocab))
+    output.write(_DumpSentenceEmbedding(l,vocab))
     output.write("\n")
   output.close()
 
@@ -461,7 +461,7 @@ def _DumpNextWords(prefix_file, vocab):
 def biggest_embedding_diff(sentences):
   embeddings = {}
   for s in sentences:
-    embeddings[s] = _DumpSentenceEmbedding(s)
+    embeddings[s] = _DumpSentenceEmbedding(s, vocab)
   print(embeddings)
 
   diffs = {}

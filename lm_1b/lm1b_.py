@@ -66,6 +66,7 @@ tf.flags.DEFINE_integer('max_eval_steps', 1000000,
                         'Maximum mumber of steps to run "eval" mode.')
 
 tf.flags.DEFINE_integer('n_top_words', 5, 'Dump the top n next words')
+tf.flags.DEFINE_integer('n_unlikely_words', 1, 'Uniformly sample from the softmax')
 tf.flags.DEFINE_integer('cutoff', 3, 'Cutoff to stop branching')
 tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line')
 
@@ -377,22 +378,30 @@ def _DumpNextWords(prefix_file, vocab):
 
       if not samples:
 
+        # We're done feeding in the prefix. It's time get the predicted next words.
+
         # If our tree is nonbranching, just accumulate to the current prefix without recursing
         # This occurs when specified conditions are met, like after a certain amount of words we stop branching
-        nonbranching = True if len(prefix_words.split() > cutoff) else False
+        nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
           indices, _ = sample_softmax(softmax[0], 1, 0)
           assert(len(indices) == 1)
-          new_word = vocab.id_to_word(indices[0])
-          prefix  = "{} {}".format(prefix, indices[0])
-          samples = indices[:]
-          char_id_samples = [vocab.word_to_char_ids(new_word)]
-          continue
+          next_word = vocab.id_to_word(indices[0])
+          if (next_word == '</S>' or
+            len(prefix_words.split()) > FLAGS.max_sample_words):
+            # This is the end of the sentence or it has exceeded the max_sample_words
+            finished_sentences.append(prefix)
+            break
+          else:
+            prefix  = "{} {}".format(prefix, indices[0])
+            samples = indices[:]
+            char_id_samples = [vocab.word_to_char_ids(next_word)]
+            continue
 
 
-        # We're done feeding in the prefix. It's time to get the predicted next words.
         # top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
-        indices, unlikely_indices = sample_softmax(softmax[0], FLAGS.n_top_words, unlikely_words)
+        indices, unlikely_indices = sample_softmax(softmax[0], FLAGS.n_top_words,
+                                                   FLAGS.n_unlikely_words)
         if use_unlikely:
           indices.append(unlikely_indices)
         # for i in indices:

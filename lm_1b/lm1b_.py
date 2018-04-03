@@ -341,6 +341,8 @@ def _DumpNextWords(prefix_file, vocab):
 
   # Recursive function that returns a trie node
   def sample_next(prefix, cutoff):
+    # Todo: Does this reset the states?
+    sess.run(t['states_init'])
     node = Node(prefix)
     prefix_words = prefix.strip()
     print(prefix_words)
@@ -390,11 +392,11 @@ def _DumpNextWords(prefix_file, vocab):
           if (next_word == '</S>' or
             len(prefix.split()) > FLAGS.max_sample_words):
             # This is the end of the sentence or it has exceeded the max_sample_words
+            print(prefix)
             finished_sentences.append(prefix)
             break
           else:
             prefix = "{} {}".format(prefix, next_word)
-            print(prefix)
             # Add back to samples + char_ids_samples to continue feeding into LSTM on this run
             samples = indices[:]
             char_ids_samples = [vocab.word_to_char_ids(next_word)]

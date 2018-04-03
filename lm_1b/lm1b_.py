@@ -350,12 +350,12 @@ def _DumpNextWords(prefix_file, vocab):
     if prefix_words.find('<S>') != 0:
       prefix_words = '<S> ' + prefix_words
 
+    samples = [vocab.word_to_id(w) for w in prefix_words.split()]
     prefix_char_ids = [vocab.word_to_char_ids(w) for w in prefix_words.split()]
 
     inputs = np.zeros([BATCH_SIZE, NUM_TIMESTEPS], np.int32)
     char_ids_inputs = np.zeros(
         [BATCH_SIZE, NUM_TIMESTEPS, vocab.max_word_length], np.int32)
-    samples = [vocab.word_to_id(w) for w in prefix_words.split()]
     char_ids_samples = prefix_char_ids[:]
 
     # print(FLAGS.max_sample_words)
@@ -394,6 +394,8 @@ def _DumpNextWords(prefix_file, vocab):
             break
           else:
             prefix = "{} {}".format(prefix, next_word)
+            print(prefix)
+            # Add back to samples + char_ids_samples to continue feeding into LSTM on this run
             samples = indices[:]
             char_ids_samples = [vocab.word_to_char_ids(next_word)]
             continue

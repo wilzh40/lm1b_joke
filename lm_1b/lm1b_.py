@@ -302,18 +302,28 @@ def _DumpSentenceEmbedding(sentence, vocab):
     print(lstm_emb)
     return lstm_emb
 
-
 def _SoftmaxTopIndices(softmax, n):
   top_indices = np.argpartition(softmax, -n)[-n:]
   top_indices_sorted = top_indices[np.argsort(softmax[top_indices])][::-1]
+  # for i in top_indices_sorted:
+  #   w = vocab.id_to_word(i)
+  #   p = softmax[i]
+  #   # TODO: Should probably dump to a file. Also, would probably be nice to be
+  #   # able to specify multiple prefixes per run. Cause there's a pretty high
+  #   # overhead on loading the checkpoint data etc.
+  #   sys.stderr.write('{}\t{}\n'.format(w, p))
   return top_indices_sorted
-  for i in top_indices_sorted:
-    w = vocab.id_to_word(i)
-    p = softmax[i]
-    # TODO: Should probably dump to a file. Also, would probably be nice to be
-    # able to specify multiple prefixes per run. Cause there's a pretty high
-    # overhead on loading the checkpoint data etc.
-    sys.stderr.write('{}\t{}\n'.format(w, p))
+
+# Returns two lists, top_n_words chosen from the top, and random_n_words chosen randomly
+# Limit is 150 words
+def sample_softmax(softmax, top_n_words, random_n_words):
+  top_indices_sorted = _SoftmaxTopIndices(softmax, 150)
+  known_indices = [i for i in top_indicies_sorted if i != vocab.eos]
+  return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
+
+
+
+
 def _DumpNextWords(prefix_file, vocab):
   # Hack for convenience
   filemode = prefix_file.endswith('.txt') or ' ' not in prefix_file
@@ -329,9 +339,9 @@ def _DumpNextWords(prefix_file, vocab):
   node_id = 0
 
   # Recursive function that returns a trie node
-  def sample_next(line, cutoff):
-    node = Node(line)
-    prefix_words = line.strip()
+  def sample_next(prefix, cutoff):
+    node = Node(prefix)
+    prefix_words = prefix.strip()
     print(prefix_words)
     targets = np.zeros([BATCH_SIZE, NUM_TIMESTEPS], np.int32)
     weights = np.ones([BATCH_SIZE, NUM_TIMESTEPS], np.float32)
@@ -362,34 +372,47 @@ def _DumpNextWords(prefix_file, vocab):
                                     t['targets_in']: targets,
                                     t['target_weights_in']: weights})
 
-      unlikely_cutoff = 10
       use_unlikely = True
-      if not samples:
-        # We're done feeding in the prefix. It's time to get the predicted next words.
-        # Cutoff early after 6 words, then just choose the top option
-        top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
-        top_indices = _SoftmaxTopIndices(softmax[0], unlikely_cutoff)
-        # For all the top probabilities of all the word
-        indices = indices[:,top_words]
-        if use_unlikely:
-          indices.append(top_indices[-1])
-        for i in indices:
-          next_word = vocab.id_to_word(i)
-          print("{}\t{}".format(next_word, softmax[0][i]))
-        for i in indices:
-          next_word = vocab.id_to_word(i)
-          # node_id += 1
-          if next_word == '<UNK>':
-            # Skip the next word if its unknown
-            continue
+      unlikely_words = 1
 
-          ## Append the new words to the top
+      if not samples:
+
+        # If our tree is nonbranching, just accumulate to the current prefix without recursing
+        # This occurs when specified conditions are met, like after a certain amount of words we stop branching
+        nonbranching = True if len(prefix_words.split() > cutoff) else False
+        if nonbranching:
+          indices, _ = sample_softmax(softmax[0], 1, 0)
+          assert(len(indices) == 1)
+          new_word = vocab.id_to_word(indices[0])
+          prefix  = "{} {}".format(prefix, indices[0])
+          samples = indices[:]
+          char_id_samples = [vocab.word_to_char_ids(new_word)]
+          continue
+
+
+        # We're done feeding in the prefix. It's time to get the predicted next words.
+        # top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
+        indices, unlikely_indices = sample_softmax(softmax[0], FLAGS.n_top_words, unlikely_words)
+        if use_unlikely:
+          indices.append(unlikely_indices)
+        # for i in indices:
+        #   next_word = vocab.id_to_word(i)
+        #   print("{}\t{}".format(next_word, softmax[0][i]))
+        for i in indices:
+          next_word = vocab.id_to_word(i)
+          assert(next_word != '<UNK>')
+          # node_id += 1
+          # if next_word == '<UNK>':
+          #   # Skip the next word if its unknown
+          #   continue
+
+          # Append the new words to the top
           if (next_word == '</S>' or
             len(prefix_words.split()) > FLAGS.max_sample_words):
-            # If it's the end of the sentence then just chill
-            finished_sentences.append(line)
+            # This is the end of the sentence or it has exceeded the max_sample_words
+            finished_sentences.append(prefix)
           else:
-            new_prefix = "{} {}".format(line, vocab.id_to_word(i))
+            new_prefix = "{} {}".format(prefix, vocab.id_to_word(i))
             new_child = sample_next(new_prefix, cutoff)
             probability = softmax[0][i]
             node.children[vocab.id_to_word(i)] = (probability, new_child)

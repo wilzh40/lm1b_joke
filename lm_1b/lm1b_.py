@@ -350,13 +350,12 @@ def _DumpNextWords(prefix_file, vocab):
     if prefix_words.find('<S>') != 0:
       prefix_words = '<S> ' + prefix_words
 
-    prefix = [vocab.word_to_id(w) for w in prefix_words.split()]
     prefix_char_ids = [vocab.word_to_char_ids(w) for w in prefix_words.split()]
 
     inputs = np.zeros([BATCH_SIZE, NUM_TIMESTEPS], np.int32)
     char_ids_inputs = np.zeros(
         [BATCH_SIZE, NUM_TIMESTEPS, vocab.max_word_length], np.int32)
-    samples = prefix[:]
+    samples = [vocab.word_to_id(w) for w in prefix_words.split()]
     char_ids_samples = prefix_char_ids[:]
 
     # print(FLAGS.max_sample_words)

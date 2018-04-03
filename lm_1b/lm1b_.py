@@ -319,7 +319,7 @@ def _SoftmaxTopIndices(softmax, n):
 # Limit is 150 words
 def sample_softmax(softmax, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 150)
-  known_indices = [i for i in top_indicies_sorted if i != vocab.eos]
+  known_indices = [i for i in top_indices_sorted if i != vocab.eos]
   return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
 
 

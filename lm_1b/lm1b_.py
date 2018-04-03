@@ -397,6 +397,7 @@ def _DumpNextWords(prefix_file, vocab):
             break
           else:
             prefix = "{} {}".format(prefix, next_word)
+            node.prefix = prefix
             # Add back to samples + char_ids_samples to continue feeding into LSTM on this run
             samples = indices[:]
             char_ids_samples = [vocab.word_to_char_ids(next_word)]

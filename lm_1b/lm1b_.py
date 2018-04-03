@@ -393,9 +393,11 @@ def _DumpNextWords(prefix_file, vocab):
             finished_sentences.append(prefix)
             break
           else:
-            prefix  = "{} {}".format(prefix, indices[0])
+            prefix = "{} {}".format(prefix, next_word)
             samples = indices[:]
+            print(len(samples))
             char_id_samples = [vocab.word_to_char_ids(next_word)]
+            print(len(char_id_samples))
             continue
 
 

@@ -363,7 +363,7 @@ def _DumpNextWords(prefix_file, vocab):
 
     while True:
       inputs[0, 0] = samples[0]
-      print(char_ids_samples[0].shape)
+      # print(char_ids_samples[0].shape)
       char_ids_inputs[0, 0, :] = char_ids_samples[0]
       samples = samples[1:]
       char_ids_samples = char_ids_samples[1:]
@@ -396,11 +396,7 @@ def _DumpNextWords(prefix_file, vocab):
           else:
             prefix = "{} {}".format(prefix, next_word)
             samples = indices[:]
-            print(len(samples))
-            print(next_word)
-            print(vocab.word_to_char_ids(next_word).shape)
-            char_id_samples = [vocab.word_to_char_ids(next_word)]
-            print(len(char_id_samples))
+            char_ids_samples = [vocab.word_to_char_ids(next_word)]
             continue
 
 

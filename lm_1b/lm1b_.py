@@ -396,6 +396,8 @@ def _DumpNextWords(prefix_file, vocab):
             prefix = "{} {}".format(prefix, next_word)
             samples = indices[:]
             print(len(samples))
+            print(next_word)
+            print(vocab.word_to_char_ids(next_word).shape)
             char_id_samples = [vocab.word_to_char_ids(next_word)]
             print(len(char_id_samples))
             continue

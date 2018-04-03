@@ -437,7 +437,7 @@ def _DumpNextWords(prefix_file, vocab):
 
 
   biggest_embedding_diff(finished_sentences)
-  # os.makedirs("./graphs")
+  os.makedirs("./graphs")
   for line in filelines:
     # For each line, build the tree
     tree = sample_next(line, len(line.split()) + FLAGS.cutoff)

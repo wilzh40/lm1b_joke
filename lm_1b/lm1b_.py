@@ -68,7 +68,7 @@ tf.flags.DEFINE_integer('max_eval_steps', 1000000,
 tf.flags.DEFINE_integer('n_top_words', 5, 'Dump the top n next words')
 tf.flags.DEFINE_integer('n_unlikely_words', 1, 'Uniformly sample from the softmax')
 tf.flags.DEFINE_integer('cutoff', 3, 'Cutoff to stop branching')
-tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line')
+tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line'
 
 # For saving demo resources, use batch size 1 and step 1.
 BATCH_SIZE = 1
@@ -393,11 +393,11 @@ def _DumpNextWords(prefix_file, vocab):
             len(prefix.split()) > FLAGS.max_sample_words):
             # This is the end of the sentence or it has exceeded the max_sample_words
             print(prefix)
+            node.prefix = prefix
             finished_sentences.append(prefix)
             break
           else:
             prefix = "{} {}".format(prefix, next_word)
-            node.prefix = prefix
             # Add back to samples + char_ids_samples to continue feeding into LSTM on this run
             samples = indices[:]
             char_ids_samples = [vocab.word_to_char_ids(next_word)]

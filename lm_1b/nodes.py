@@ -5,13 +5,14 @@ class Node(object):
         # { word: (probability, node)}
         self.prefix = prefix
         self.children  = {}
-    
+
 
 def visualize( t, fd=None ) :
     graph = GvGen()
     def walk( node, total_prob, parent=None ) :
         if parent is None :
-            parent = graph.newItem(t.prefix)
+            formatted_prefix = t.prefix.replace("\"","\\\"");
+            parent = graph.newItem(formatted_prefix)
 
         for k, (prob, child_node) in node.children.items() :
             n = graph.newItem(k)
@@ -21,7 +22,5 @@ def visualize( t, fd=None ) :
     walk(t, 1)
     if fd is None:
         return graph.dot()
-    else: 
+    else:
         return graph.dot(fd)
-
-

@@ -450,8 +450,8 @@ def _DumpNextWords(prefix_file, vocab):
   for l in finished_sentences:
     output.write(l)
     output.write("\t")
-    print(_DumpSentenceEmbedding(l,vocab))
-    output.write(_DumpSentenceEmbedding(l,vocab))
+    # print(_DumpSentenceEmbedding(l,vocab))
+    # output.write(_DumpSentenceEmbedding(l,vocab))
     output.write("\n")
   output.close()
 

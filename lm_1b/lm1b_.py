@@ -405,11 +405,11 @@ def _DumpNextWords(prefix_file, vocab):
 
 
         # top_words = 1 if len(prefix_words.split()) > cutoff else FLAGS.n_top_words
-        indices, unlikely_indices = sample_softmax(softmax[0],  vocab,
+        likely_indices, unlikely_indices = sample_softmax(softmax[0],  vocab,
                                                    FLAGS.n_top_words,
                                                    FLAGS.n_unlikely_words)
         if use_unlikely:
-          indices = np.append(indices, unlikely_indices)
+          indices = np.append(likely_indices, unlikely_indices)
         # for i in indices:
         #   next_word = vocab.id_to_word(i)
         #   print("{}\t{}".format(next_word, softmax[0][i]))
@@ -427,7 +427,10 @@ def _DumpNextWords(prefix_file, vocab):
             # This is the end of the sentence or it has exceeded the max_sample_words
             finished_sentences.append(prefix)
           else:
-            new_prefix = "{} {}".format(prefix, vocab.id_to_word(i))
+            if i >= len(likely_indices):
+              new_prefix = "{} _{}_".format(prefix, vocab.id_to_word(i))
+            else:
+              new_prefix = "{} {}".format(prefix, vocab.id_to_word(i))
             new_child = sample_next(new_prefix, cutoff)
             probability = softmax[0][i]
             node.children[vocab.id_to_word(i)] = (probability, new_child)

@@ -479,7 +479,7 @@ def biggest_embedding_diff(sentences):
   for s1 in sentences:
     for s2 in sentences:
       diffs[np.dot(s1,s2)] = (s1,s2)
-  return collections.OrderedDict(sorted(d.items()))
+  return collections.OrderedDict(sorted(diffs.items()))
 
 def main(unused_argv):
   vocab = data_utils.CharsVocabulary(FLAGS.vocab_file, MAX_WORD_LEN)

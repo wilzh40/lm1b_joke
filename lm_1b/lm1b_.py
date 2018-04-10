@@ -443,7 +443,8 @@ def _DumpNextWords(prefix_file, vocab):
   biggest_diffs = biggest_embedding_diff(finished_sentences)
   print(biggest_diffs)
   output = open("biggest_diffs", 'w')
-  output.write(biggest_diffs)
+  for keys,values in cars.items():
+    output.write("{}: {} \n".format(keys,values))
   output.close()
 
   os.makedirs("./graphs")

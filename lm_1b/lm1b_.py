@@ -413,7 +413,7 @@ def _DumpNextWords(prefix_file, vocab):
         # for i in indices:
         #   next_word = vocab.id_to_word(i)
         #   print("{}\t{}".format(next_word, softmax[0][i]))
-        for i in indices:
+        for c,i in enumerate(indices):
           next_word = vocab.id_to_word(i)
           assert(next_word != '<UNK>')
           # node_id += 1
@@ -427,8 +427,8 @@ def _DumpNextWords(prefix_file, vocab):
             # This is the end of the sentence or it has exceeded the max_sample_words
             finished_sentences.append(prefix)
           else:
-            if i >= len(likely_indices):
-              new_prefix = "{} _{}_".format(prefix, vocab.id_to_word(i))
+            if c >= len(likely_indices):
+              new_prefix = "{} _{}".format(prefix, vocab.id_to_word(i))
             else:
               new_prefix = "{} {}".format(prefix, vocab.id_to_word(i))
             new_child = sample_next(new_prefix, cutoff)

@@ -301,9 +301,9 @@ def _DumpSentenceEmbedding(sentence, vocab):
     # with tf.gfile.Open(fname, mode='w') as f:
     #   np.save(f, lstm_emb)
     # sys.stderr.write('LSTM embedding step %d file saved\n' % i)
-    print(lstm_emb)
-    # It's a 2-dim array
-    return lstm_emb[0]
+  print(lstm_emb)
+  # It's a 2-dim array
+  return lstm_emb[0]
 
 def _SoftmaxTopIndices(softmax, n):
   top_indices = np.argpartition(softmax, -n)[-n:]

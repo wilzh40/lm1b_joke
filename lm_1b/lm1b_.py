@@ -459,7 +459,7 @@ def _DumpNextWords(prefix_file, vocab):
     output.write("\n")
   output.close()
 
-  biggest_diffs = biggest_embedding_diff(finished_sentences)
+  biggest_diffs = biggest_embedding_diff(finished_sentences, vocab)
   print(biggest_diffs)
   output = open("biggest_diffs", 'w')
   for keys,values in biggest_diffs.items():
@@ -470,7 +470,7 @@ def _DumpNextWords(prefix_file, vocab):
     # lines.close()
 
 # Takes a list of sentences and returns a dictionary of the maximal distances between the embeddigns
-def biggest_embedding_diff(sentences):
+def biggest_embedding_diff(sentences, vocab):
   embeddings = {}
   for s in sentences:
     embeddings[s] = _DumpSentenceEmbedding(s, vocab)

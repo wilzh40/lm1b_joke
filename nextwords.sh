@@ -5,4 +5,4 @@ python ./lm_1b/lm1b_.py --mode next_words \
   --pbtxt data/graph-2016-09-10.pbtxt \
   --vocab_file data/vocab-2016-09-10.txt \
   --ckpt 'data/ckpt-*' \
-  --max_sample_words 35 --n_top_words 3
+  --max_sample_words 35 --n_top_words 10 --cutoff 2 --n_unlikely_words 1

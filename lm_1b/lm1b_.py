@@ -480,7 +480,7 @@ def biggest_embedding_diff(sentences, vocab):
   diffs = {}
   for s1 in sentences:
     for s2 in sentences:
-      diffs[np.dot(s1,s2)] = (s1,s2)
+        diffs[np.dot(embeddings[s1],embeddings[s2])] = (s1,s2)
   print(diffs)
   return collections.OrderedDict(sorted(diffs.items()))
 

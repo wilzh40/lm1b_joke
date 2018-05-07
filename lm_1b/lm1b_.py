@@ -326,7 +326,6 @@ def sample_softmax(softmax, vocab, top_n_words, random_n_words):
 
 
 
-
 def _DumpNextWords(prefix_file, vocab):
   # Hack for convenience
   filemode = prefix_file.endswith('.txt') or ' ' not in prefix_file
@@ -442,30 +441,34 @@ def _DumpNextWords(prefix_file, vocab):
     return node
 
 
-
-  os.makedirs("./graphs")
-  for line in filelines:
-    # For each line, build the tree
-    tree = sample_next(line, len(line.split()) + FLAGS.cutoff)
-    with open("./graphs/graph_{}_cutoff-{}_branch-{}".format(line, FLAGS.cutoff, FLAGS.n_top_words), 'w') as f:
-      visualize(tree, f)
-      f.write("\n")
+  #TODO: temporary hack to disable graph writing
+  write_graphs = False
+  if write_graphs:
+    os.makedirs("./graphs")
+    for line in filelines:
+      # For each line, build the tree
+      tree = sample_next(line, len(line.split()) + FLAGS.cutoff)
+      with open("./graphs/graph_{}_cutoff-{}_branch-{}".format(line, FLAGS.cutoff, FLAGS.n_top_words), 'w') as f:
+        visualize(tree, f)
+        f.write("\n")
 
   output = open("output_sentences", 'w')
   for l in finished_sentences:
     output.write(l)
-    output.write("\t")
+    # output.write("\t")
     # print(_DumpSentenceEmbedding(l,vocab))
     # output.write(_DumpSentenceEmbedding(l,vocab))
     output.write("\n")
   output.close()
 
-  biggest_diffs = biggest_embedding_diff(finished_sentences, vocab)
-  print(biggest_diffs)
-  output = open("biggest_diffs", 'w')
-  for keys,values in biggest_diffs.items():
-    output.write("{}: {} \n".format(keys,values))
-  output.close()
+  calculate_embeddings = False
+  if calculate_embeddings:
+    biggest_diffs = biggest_embedding_diff(finished_sentences, vocab)
+    print(biggest_diffs)
+    output = open("biggest_diffs", 'w')
+    for keys,values in biggest_diffs.items():
+      output.write("{}: {} \n".format(keys,values))
+    output.close()
 
   # if filemode:
     # lines.close()

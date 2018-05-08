@@ -325,8 +325,8 @@ def _SoftmaxTopIndices(softmax, n):
 def sample_temp(softmax, temperature=1.0):
   softmax = np.array(softmax)**(1/temperature)
   p_sum = softmax.sum()
-  sample_temp = softmax/p_sum
-  return np.argmax(np.random.multinomial(1, sample_temp, 1))
+  scaled = softmax/p_sum
+  return np.argmax(np.random.multinomial(1, scaled, 1))
 
 def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 100)

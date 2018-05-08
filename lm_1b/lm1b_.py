@@ -322,13 +322,19 @@ def _SoftmaxTopIndices(softmax, n):
 # Returns two lists, top_n_words chosen from the top, and random_n_words chosen randomly
 # Limit is 150 words
 
-def sample_temp(softmax, temperature=1.0):
-  a = softmax ** (1/temperature)
-  p_sum = a.sum()
-  scaled = a/a.sum()
-  print(scaled.sum())
-  np.random.choice(len(scaled), p=scaled)
-  # return np.argmax(np.random.multinomial(1, scaled, 1))
+def sample_temp(a, temperature=1.0):
+    # helper function to sample an index from a probability array
+    a = np.log(a) / temperature
+    a = np.exp(a) / np.sum(np.exp(a))
+    return np.argmax(np.random.multinomial(1, a, 1))
+
+# def sample_temp(softmax, temperature=1.0):
+#   a = softmax ** (1/temperature)
+#   p_sum = a.sum()
+#   scaled = a/a.sum()
+#   print(scaled.sum())
+#   np.random.choice(len(scaled), p=scaled)
+#   # return np.argmax(np.random.multinomial(1, scaled, 1))
 
 def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 100)

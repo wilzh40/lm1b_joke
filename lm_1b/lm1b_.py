@@ -472,7 +472,7 @@ def _DumpNextWords(prefix_file, vocab):
         f.write("\n")
 
   output = open(".{}_cutoff{}_top{}_bottom{}_temp{}".format(line, FLAGS.prefix_file, FLAGS.cutoff, FLAGS.n_top_words,
-                                                                FLAGS.n_bottom_words, FLAGS.temperature), 'w')
+                                                                FLAGS.n_unlikely_words, FLAGS.temperature), 'w')
   for l in finished_sentences:
     output.write(l)
     # output.write("\t")

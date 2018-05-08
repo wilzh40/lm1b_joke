@@ -343,7 +343,7 @@ def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   #TODO: Change temperature
   randoms = []
   for i in range(random_n_words):
-    randoms.append(sample_temp(softmax, vocab, 0.5))
+    randoms.append(sample_temp(softmax, vocab, FLAGS.temperature))
   # return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
   return (known_indices[:top_n_words], np.array(randoms))
 
@@ -411,7 +411,7 @@ def _DumpNextWords(prefix_file, vocab):
         nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
           # indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
-          indices = np.array([sample_temp(softmax[0], vocab, FLAGS.temperature)])
+          indices = np.array([sample_temp(softmax[0], vocab)])
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or

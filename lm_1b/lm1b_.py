@@ -471,7 +471,8 @@ def _DumpNextWords(prefix_file, vocab):
         visualize(tree, f)
         f.write("\n")
 
-  output = open("output_sentences", 'w')
+  output = open(".{}_cutoff{}_top{}_bottom{}_temp{}".format(line, FLAGS.prefix_file, FLAGS.cutoff, FLAGS.n_top_words,
+                                                                FLAG.n_bottom_words, FLAGS.temperature), 'w')
   for l in finished_sentences:
     output.write(l)
     # output.write("\t")

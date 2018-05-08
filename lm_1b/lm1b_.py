@@ -324,7 +324,7 @@ def _SoftmaxTopIndices(softmax, n):
 
 def sample_temp(a, vocab, temperature=1.0):
     # helper function to sample an index from a probability array
-    a[vocab.unk] = 0
+    a[vocab.unk] = 0.0000000000001
     a = np.log(np.array(a, dtype=np.float64)) / temperature
     a = np.exp(a) / np.sum(np.exp(a))
     return np.argmax(np.random.multinomial(1, a, 1))
@@ -406,7 +406,7 @@ def _DumpNextWords(prefix_file, vocab):
         nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
           # indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
-          indices = np.array([sample_temp(softmax[0], vocab, FLAGS.temperature)])
+          indices = np.array([sample_temp(softmax[0], FLAGS.temperature)])
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or

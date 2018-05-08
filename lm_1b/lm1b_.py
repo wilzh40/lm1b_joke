@@ -463,7 +463,7 @@ def _DumpNextWords(prefix_file, vocab):
   #TODO: temporary hack to disable graph writing
   write_graphs = True
   if write_graphs:
-    os.makedirs("./graphs")
+    # os.makedirs("./graphs")
     for line in filelines:
       # For each line, build the tree
       tree = sample_next(line, len(line.split()) + FLAGS.cutoff)

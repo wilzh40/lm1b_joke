@@ -326,6 +326,7 @@ def sample_temp(softmax, temperature=1.0):
   softmax = np.array(softmax)**(1/temperature)
   p_sum = softmax.sum()
   scaled = softmax/p_sum
+  print(scaled.sum())
   return np.argmax(np.random.multinomial(1, scaled, 1))
 
 def sample_softmax(softmax, vocab, top_n_words, random_n_words):

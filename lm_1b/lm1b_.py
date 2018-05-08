@@ -70,6 +70,8 @@ tf.flags.DEFINE_integer('n_top_words', 5, 'Dump the top n next words')
 tf.flags.DEFINE_integer('n_unlikely_words', 1, 'Uniformly sample from the softmax')
 tf.flags.DEFINE_integer('cutoff', 3, 'Cutoff to stop branching')
 tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line')
+tf.flags.DEFINE_float('temperature', 1.0,
+                        'Temperature for sampling')
 
 # For saving demo resources, use batch size 1 and step 1.
 BATCH_SIZE = 1
@@ -319,6 +321,13 @@ def _SoftmaxTopIndices(softmax, n):
 
 # Returns two lists, top_n_words chosen from the top, and random_n_words chosen randomly
 # Limit is 150 words
+
+def sample_temp(softmax, temperature=1.0):
+  a = np.array(softmax)**(1/temperature)
+  p_sum = softmax.sum()
+  sample_temp = softmax/p_sum
+  return np.argmax(np.random.multinomial(1, sample_temp, 1))
+
 def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 100)
   known_indices = [i for i in top_indices_sorted if i != vocab.unk]
@@ -387,7 +396,8 @@ def _DumpNextWords(prefix_file, vocab):
         # This occurs when specified conditions are met, like after a certain amount of words we stop branching
         nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
-          indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
+          # indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
+          indices = sample_temp(softmax[0], FLAGS.temperature)
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or

@@ -340,7 +340,12 @@ def sample_temp(a, vocab, temperature=1.0):
 def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   top_indices_sorted = _SoftmaxTopIndices(softmax, 100)
   known_indices = [i for i in top_indices_sorted if i != vocab.unk]
-  return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
+  #TODO: Change temperature
+  randoms = []
+  for i in range(random_n_words):
+    randoms.append(sample_temp(softmax, vocab, 0.5))
+  # return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
+  return (known_indices[:top_n_words], np.array(randoms))
 
 
 

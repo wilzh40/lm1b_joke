@@ -412,7 +412,7 @@ def _DumpNextWords(prefix_file, vocab):
         nonbranching = True if len(prefix_words.split()) > cutoff else False
         if nonbranching:
           # indices, _ = sample_softmax(softmax[0], vocab, 1, 0)
-          indices = np.array([sample_temp(softmax[0], vocab)]).astype(int)
+          indices = np.array([sample_temp(softmax[0], vocab)])
           assert(len(indices) == 1)
           next_word = vocab.id_to_word(indices[0])
           if (next_word == '</S>' or
@@ -435,12 +435,12 @@ def _DumpNextWords(prefix_file, vocab):
                                                    FLAGS.n_top_words,
                                                    FLAGS.n_unlikely_words)
         if use_unlikely:
-          indices = np.append(likely_indices, unlikely_indices)
+          indices = np.append(likely_indices, unlikely_indices).astype(int)
         print(indices)
         # for i in indices:
         #   next_word = vocab.id_to_word(i)
         #   print("{}\t{}".format(next_word, softmax[0][i]))
-        for c,i in enumerate(indices):
+        for c,i in enumerate(indices.astype(int)):
           next_word = vocab.id_to_word(i)
           assert(next_word != '<UNK>')
           # node_id += 1

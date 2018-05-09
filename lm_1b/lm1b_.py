@@ -70,7 +70,7 @@ tf.flags.DEFINE_integer('n_top_words', 5, 'Dump the top n next words')
 tf.flags.DEFINE_integer('n_unlikely_words', 1, 'Uniformly sample from the softmax')
 tf.flags.DEFINE_integer('cutoff', 3, 'Cutoff to stop branching')
 tf.flags.DEFINE_string('prefix_file', '', 'File containing one prefix per line')
-tf.flags.DEFINE_float('temperature', 1.0,
+tf.flags.DEFINE_float('temperature', 0.7,
                         'Temperature for sampling')
 
 # For saving demo resources, use batch size 1 and step 1.
@@ -342,6 +342,7 @@ def sample_softmax(softmax, vocab, top_n_words, random_n_words):
   known_indices = [i for i in top_indices_sorted if i != vocab.unk]
   #TODO: Change temperature
   randoms = []
+
   for i in range(random_n_words):
     randoms.append(sample_temp(softmax, vocab, FLAGS.temperature))
   # return (known_indices[:top_n_words], np.random.choice(known_indices, random_n_words))
@@ -435,6 +436,7 @@ def _DumpNextWords(prefix_file, vocab):
                                                    FLAGS.n_unlikely_words)
         if use_unlikely:
           indices = np.append(likely_indices, unlikely_indices)
+        print(indices)
         # for i in indices:
         #   next_word = vocab.id_to_word(i)
         #   print("{}\t{}".format(next_word, softmax[0][i]))
